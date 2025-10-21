@@ -1,0 +1,72 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+
+<div class="card p-4 shadow-lg rounded-lg max-w-7xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">Sistema de Gestão de Funcionários</h2>
+
+  <div class="flex flex-col md:flex-row items-center gap-3 mb-4">
+    <p-dropdown [options]="cargos" [(ngModel)]="filtroCargo" placeholder="Filtrar por Cargo"
+      (onChange)="aplicarFiltros()" class="w-full md:w-auto" optionLabel="label" optionValue="value">
+    </p-dropdown>
+
+    <p-selectButton [options]="statusOptions" [(ngModel)]="filtroStatus" optionLabel="label" optionValue="value"
+      (onChange)="aplicarFiltros()" class="w-full md:w-auto"></p-selectButton>
+
+    <div class="flex gap-2 ml-auto w-full md:w-auto">
+      <p-button icon="pi pi-plus" label="Novo" [routerLink]="['/funcionarios/novo']"
+        styleClass="p-button-success"></p-button>
+
+      <p-button icon="pi pi-refresh" label="Recarregar" (onClick)="carregarFuncionarios()"
+        styleClass="p-button-info"></p-button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading()" class="flex justify-center items-center h-40">
+    <i class="pi pi-spin pi-spinner text-4xl text-blue-500"></i>
+    <span class="ml-3 text-lg"> Carregando dados...</span>
+  </div>
+
+  <p-table [value]="funcionarios()" [paginator]="true" [rows]="10" [tableStyle]="{'min-width': '50rem'}"
+    *ngIf="!isLoading()">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome" style="width: 20%">Nome <p-sortIcon field="nome"></p-sortIcon></th>
+        <th style="width: 25%">Email</th>
+        <th style="width: 15%">Cargo</th>
+        <th pSortableColumn="salario" style="width: 15%">Salário <p-sortIcon field="salario"></p-sortIcon></th>
+        <th style="width: 15%">Admissão</th>
+        <th style="width: 10%">Status</th>
+        <th style="width: 15%">Ações</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-funcionario>
+      <tr>
+        <td>{{ funcionario.nome }}</td>
+        <td>{{ funcionario.email }}</td>
+        <td>{{ funcionario.cargo }}</td>
+        <td>R$ {{ funcionario.salario | number:'1.2-2' }}</td>
+        <td>{{ funcionario.dataAdmissao | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <p-tag [severity]="funcionario.ativo ? 'success' : 'danger'"
+            [value]="funcionario.ativo ? 'Ativo' : 'Inativo'"></p-tag>
+        </td>
+        <td class="flex gap-2">
+          <p-button icon="pi pi-pencil" pTooltip="Editar" tooltipPosition="top"
+            (onClick)="navegarParaEdicao(funcionario.id)" styleClass="p-button-sm p-button-secondary"></p-button>
+
+          <p-button icon="pi pi-times" pTooltip="Inativar" tooltipPosition="top"
+            styleClass="p-button-danger p-button-sm" [disabled]="!funcionario.ativo"
+            (onClick)="inativarFuncionario($event, funcionario)">
+          </p-button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center py-4">Nenhum funcionário encontrado com os filtros aplicados.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
